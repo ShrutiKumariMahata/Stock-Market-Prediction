@@ -9,6 +9,8 @@ The Stock Market Prediction System is a machine learning–based application des
 
 ## 2. Abstract
 
+The Stock Market Prediction project aims to analyze historical stock price data and forecast future market trends using machine learning techniques. The system processes time-series stock data, applies data preprocessing and feature extraction, and trains predictive models to estimate future prices. This project demonstrates the practical application of machine learning in financial analysis and decision support systems. While the system does not guarantee exact predictions due to market volatility, it provides valuable insights to assist investors and analysts.
+
 ### Stock Market Prediction System
 
 **What:**  
@@ -37,6 +39,26 @@ Predicting stock market prices is a challenging task due to market volatility, e
 ---
 
 ## 5. System Architecture
+
+The system follows a modular architecture consisting of the following components:
+
+1. Data Source  
+   - Historical stock market data collected from Yahoo Finance
+
+2. Data Preprocessing Module  
+   - Handles missing values  
+   - Normalizes data  
+   - Generates technical indicators
+
+3. Model Training Module  
+   - Trains machine learning models on processed data  
+   - Saves trained models for future use
+
+4. Prediction Module  
+   - Uses trained model to predict future stock prices
+
+5. Visualization Module  
+   - Displays actual vs predicted prices using graphs
 
 **Architecture Pattern:**  
 End-to-end data pipeline including data collection, preprocessing, feature engineering, model training, prediction, and visualization.
@@ -119,7 +141,28 @@ The model demonstrates effective trend prediction, with performance evaluated us
 - Improved prediction accuracy using advanced LSTM variants and hybrid models  
 
 ---
+## Applications
+- Investment decision support
+- Financial market analysis
+- Risk assessment
+- Educational purposes for understanding stock trends
 
+---
+
+## Advantages
+- Automated prediction system
+- Reduces manual analysis effort
+- Uses historical data effectively
+- Easy to extend with new features
+
+---
+
+## Disadvantages
+- Predictions depend on historical data
+- External factors like news are not considered
+- Market volatility affects accuracy
+
+---
 ## 13. Conclusion
 The Stock Market Prediction System demonstrates the practical application of machine learning techniques in financial forecasting. While predictions are not absolute, the system provides valuable insights into market trends and supports informed investment decision-making.
 
