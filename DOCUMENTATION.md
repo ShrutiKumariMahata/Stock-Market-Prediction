@@ -96,6 +96,11 @@ The dataset consists of historical stock price data obtained from **Yahoo Financ
 - Volume  
 
 The dataset is used to analyze trends and train the prediction model.
+### Dataset Structure Diagram
+
+The following diagram represents the structure of the dataset used for stock market prediction, including all relevant attributes collected from historical stock data sources.
+
+![Dataset Structure](https://github.com/ShrutiKumariMahata/Stock-Market-Prediction/blob/main/screenshots/Screenshot%202025-12-15%20211541.png)
 
 ---
 
@@ -129,6 +134,10 @@ The dataset is divided into training and testing sets to evaluate the model’s 
 
 **Results:**  
 The model demonstrates effective trend prediction, with performance evaluated using **Mean Squared Error (MSE)** on historical test data.
+
+### Prediction Output Visualization
+
+![Actual vs Predicted Prices](https://github.com/ShrutiKumariMahata/Stock-Market-Prediction/blob/main/screenshots/Screenshot%202025-12-15%20212539.png)
 
 ---
 
