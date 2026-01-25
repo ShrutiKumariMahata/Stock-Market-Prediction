@@ -100,7 +100,8 @@ The dataset is used to analyze trends and train the prediction model.
 
 The following diagram represents the structure of the dataset used for stock market prediction, including all relevant attributes collected from historical stock data sources.
 
-![Dataset Structure](https://github.com/ShrutiKumariMahata/Stock-Market-Prediction/blob/main/screenshots/Screenshot%202025-12-15%20211541.png)
+![Dataset Structure](https://github.com/ShrutiKumariMahata/Stock-Market-Prediction/blob/main/screenshots/Screenshot%202025-12-15%20211528.png)
+
 
 ---
 
