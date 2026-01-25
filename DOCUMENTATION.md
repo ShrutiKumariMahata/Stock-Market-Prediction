@@ -63,7 +63,7 @@ The system follows a modular architecture consisting of the following components
 
 The following diagram illustrates the overall architecture of the Stock Market Prediction System, showing the flow of data from data collection to prediction and visualization.
 
-![System Architecture Diagram](screenshots/system_architecture.png)
+![System Architecture Diagram](Screenshot 2025-12-16 095837.png)
 
 **Architecture Pattern:**  
 End-to-end data pipeline including data collection, preprocessing, feature engineering, model training, prediction, and visualization.
