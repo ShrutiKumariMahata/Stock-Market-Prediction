@@ -1,30 +1,52 @@
-# 📈 Stock Market Prediction
+# 📈 AI-Based Stock Market Prediction System  
 
-A machine learning based project that analyzes historical stock market data and predicts future stock price trends.
-
----
-
-## 🔍 Problem Statement
-Stock prices are volatile and influenced by multiple factors. Manual prediction is difficult and unreliable, hence an automated prediction system is required.
+The **AI-Based Stock Market Prediction System** is designed to analyze historical stock market data and predict future stock price trends using **Machine Learning and Deep Learning (LSTM)**.  
+By leveraging time-series analysis, the system helps in understanding market behavior and forecasting future stock prices.
 
 ---
 
-## 🎯 Objectives
-- Analyze historical stock market data
-- Build a prediction model using machine learning
-- Visualize stock trends and predictions
+## 🔍 Problem Statement  
+
+Stock prices are highly volatile and influenced by multiple external and internal factors such as economic indicators, company performance, and global events. Manual prediction is unreliable, hence an **automated ML-based prediction system** is required.
 
 ---
 
-## 🛠 Technologies Used
-- Python
-- Machine Learning
-- LSTM
-- Pandas, NumPy
-- Yahoo Finance
-- Git & GitHub
+## 🎯 Project Objectives  
+
+- Collect and analyze historical stock market data  
+- Clean and preprocess data for modeling  
+- Build a deep learning model using **LSTM**  
+- Train and evaluate the prediction model  
+- Visualize predicted vs actual stock prices  
 
 ---
+
+## 🛠 Technologies Used  
+
+- **Python**  
+- **Machine Learning & Deep Learning**  
+- **LSTM (Long Short-Term Memory)**  
+- **Pandas, NumPy**  
+- **Matplotlib, Seaborn**  
+- **Yahoo Finance (yfinance)**  
+- **Jupyter Notebook**  
+- **Git & GitHub**  
+
+---
+
+## 🧩 Project Phases  
+
+1️⃣ Data Collection  
+2️⃣ Data Cleaning & Preprocessing  
+3️⃣ Feature Engineering  
+4️⃣ Model Building (LSTM)  
+5️⃣ Model Training  
+6️⃣ Model Evaluation  
+7️⃣ Prediction & Visualization  
+
+---
+
+
 
 ## 📄 Documentation
 Detailed project documentation is available in  
@@ -34,3 +56,4 @@ Detailed project documentation is available in
 
 ## 👩‍💻 Author
 **Shruti Kumari Mahata**
+
