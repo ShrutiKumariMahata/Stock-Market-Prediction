@@ -13,13 +13,13 @@ const card = {
     boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
 }
 
-// Style for metric cards (boxes)
+// Style for metric cards (boxes) - Black text, smaller font
 const metricCardStyle = {
     background: '#ffffff',
-    border: '1px solid #2563eb',
+    border: '1px solid #e2e8f0',
     borderRadius: '12px',
-    padding: '16px',
-    boxShadow: '0 1px 3px rgba(37, 99, 235, 0.1)',
+    padding: '14px',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
     transition: 'all 0.2s ease'
 }
 
@@ -36,10 +36,9 @@ const TICKERS = [
     { symbol: 'NVDA', name: 'NVIDIA' },
 ]
 
+// Only LSTM + Attention model type - removed CNN-LSTM and Transformer
 const MODEL_TYPES = [
     { value: 'lstm_attention', label: 'LSTM + Attention' },
-    { value: 'cnn_lstm', label: 'CNN-LSTM Hybrid' },
-    { value: 'transformer', label: 'Transformer' },
 ]
 
 const selectStyle = {
@@ -131,7 +130,7 @@ export default function Training() {
         setTrainingTime(0)
 
         addLine('init', `Starting training for ${config.ticker}`)
-        addLine('init', `Model: ${MODEL_TYPES.find(m => m.value === config.modelType)?.label}`)
+        addLine('init', `Model: LSTM + Attention`)
         addLine('init', `Epochs: ${config.epochs} | Batch: ${config.batchSize} | LR: ${config.learningRate}`)
 
         esRef.current = startTrainingStream(
@@ -415,55 +414,55 @@ export default function Training() {
                 </div>
             )}
 
-            {/* Metrics Cards - White boxes with blue borders */}
+            {/* Metrics Cards - ALL BLACK TEXT with smaller font */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px' }}>
                 {/* Epoch Card */}
                 <div style={metricCardStyle}>
-                    <div style={{ fontSize: '11px', fontWeight: '500', color: '#64748b', marginBottom: '4px' }}>EPOCH</div>
-                    <div style={{ fontSize: '24px', fontWeight: '700', color: '#2563eb' }}>
+                    <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>EPOCH</div>
+                    <div style={{ fontSize: '18px', fontWeight: '600', color: '#1e293b' }}>
                         {current ? `${current.epoch} / ${current.total}` : '— / —'}
                     </div>
                 </div>
 
                 {/* Train Loss Card */}
                 <div style={metricCardStyle}>
-                    <div style={{ fontSize: '11px', fontWeight: '500', color: '#64748b', marginBottom: '4px' }}>TRAIN LOSS</div>
-                    <div style={{ fontSize: '24px', fontWeight: '700', color: '#ef4444' }}>
+                    <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>TRAIN LOSS</div>
+                    <div style={{ fontSize: '18px', fontWeight: '600', color: '#1e293b' }}>
                         {current ? current.train_loss?.toFixed(4) : '—'}
                     </div>
                 </div>
 
                 {/* Val Loss Card */}
                 <div style={metricCardStyle}>
-                    <div style={{ fontSize: '11px', fontWeight: '500', color: '#64748b', marginBottom: '4px' }}>VAL LOSS</div>
-                    <div style={{ fontSize: '24px', fontWeight: '700', color: '#f97316' }}>
+                    <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>VAL LOSS</div>
+                    <div style={{ fontSize: '18px', fontWeight: '600', color: '#1e293b' }}>
                         {current ? current.val_loss?.toFixed(4) : '—'}
                     </div>
                 </div>
 
                 {/* Direction Acc Card */}
                 <div style={metricCardStyle}>
-                    <div style={{ fontSize: '11px', fontWeight: '500', color: '#64748b', marginBottom: '4px' }}>DIRECTION ACC</div>
-                    <div style={{ fontSize: '24px', fontWeight: '700', color: '#22c55e' }}>
+                    <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>DIRECTION ACC</div>
+                    <div style={{ fontSize: '18px', fontWeight: '600', color: '#1e293b' }}>
                         {current ? `${current.direction_accuracy?.toFixed(1)}%` : '—'}
                     </div>
                 </div>
 
                 {/* Learning Rate Card */}
                 <div style={metricCardStyle}>
-                    <div style={{ fontSize: '11px', fontWeight: '500', color: '#64748b', marginBottom: '4px' }}>LEARNING RATE</div>
-                    <div style={{ fontSize: '24px', fontWeight: '700', color: '#f59e0b' }}>
+                    <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>LEARNING RATE</div>
+                    <div style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', fontFamily: 'monospace' }}>
                         {current ? current.lr : '1e-3'}
                     </div>
                 </div>
 
                 {/* Progress Card */}
                 <div style={metricCardStyle}>
-                    <div style={{ fontSize: '11px', fontWeight: '500', color: '#64748b', marginBottom: '4px' }}>PROGRESS</div>
-                    <div style={{ fontSize: '24px', fontWeight: '700', color: '#2563eb' }}>
+                    <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>PROGRESS</div>
+                    <div style={{ fontSize: '18px', fontWeight: '600', color: '#1e293b' }}>
                         {epochPct}%
                     </div>
-                    {running && <div style={{ fontSize: '10px', color: '#94a3b8', marginTop: '4px' }}>{formatTime(trainingTime)}</div>}
+                    {running && <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '4px' }}>{formatTime(trainingTime)}</div>}
                 </div>
             </div>
 

@@ -38,6 +38,15 @@ const card = {
     boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
 }
 
+// Consistent metric card style with smaller font
+const metricCardStyle = {
+    background: '#ffffff',
+    border: '1px solid #e2e8f0',
+    borderRadius: '12px',
+    padding: '14px',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+}
+
 export default function Analysis() {
     const [ticker, setTicker] = useState('AAPL')
     const [period, setPeriod] = useState('3mo')
@@ -148,7 +157,7 @@ export default function Analysis() {
     }, [data, ticker, period])
 
     return (
-        <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1400px', margin: '0 auto' }}>
+        <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1400px', margin: '0 auto', background: '#f8fafc', minHeight: '100vh' }}>
 
             {/* Header Section */}
             <div style={{
@@ -159,14 +168,9 @@ export default function Analysis() {
                 gap: '12px'
             }}>
                 <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#1e293b', margin: 0 }}>
-                            Market Analysis
-                        </h1>
-                        {isReady && metrics?.trendSignal && (
-                            <TrendBadge trend={metrics.trendSignal.toLowerCase()} />
-                        )}
-                    </div>
+                    <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#1e293b', margin: 0 }}>
+                        Market Analysis
+                    </h1>
                     <p style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>
                         Real-time data via Yahoo Finance • Last updated: {stats?.lastUpdated || 'N/A'}
                     </p>
@@ -178,7 +182,7 @@ export default function Analysis() {
                         value={ticker}
                         onChange={e => setTicker(e.target.value)}
                         style={{
-                            background: '#f8fafc',
+                            background: '#ffffff',
                             border: '1px solid #e2e8f0',
                             color: '#1e293b',
                             padding: '8px 12px',
@@ -200,7 +204,7 @@ export default function Analysis() {
                         value={period}
                         onChange={e => setPeriod(e.target.value)}
                         style={{
-                            background: '#f8fafc',
+                            background: '#ffffff',
                             border: '1px solid #e2e8f0',
                             color: '#1e293b',
                             padding: '8px 12px',
@@ -219,16 +223,16 @@ export default function Analysis() {
                         onClick={refresh}
                         disabled={loading}
                         style={{
-                            background: loading ? '#e2e8f0' : '#f8fafc',
+                            background: loading ? '#e2e8f0' : '#ffffff',
                             border: '1px solid #e2e8f0',
-                            color: loading ? '#94a3b8' : '#2563eb',
+                            color: loading ? '#94a3b8' : '#1e293b',
                             padding: '8px 12px',
                             borderRadius: '8px',
                             cursor: loading ? 'not-allowed' : 'pointer',
                             fontSize: '13px'
                         }}
                     >
-                        {loading ? '⌛' : '⟳'} Refresh
+                        Refresh
                     </button>
                 </div>
             </div>
@@ -249,7 +253,7 @@ export default function Analysis() {
                         value={compareTicker}
                         onChange={e => setCompareTicker(e.target.value)}
                         style={{
-                            background: '#f8fafc',
+                            background: '#ffffff',
                             border: '1px solid #e2e8f0',
                             color: '#1e293b',
                             padding: '6px 10px',
@@ -300,12 +304,11 @@ export default function Analysis() {
                 <div style={{
                     ...card,
                     textAlign: 'center',
-                    padding: '60px 20px',
-                    color: '#64748b'
+                    padding: '60px 20px'
                 }}>
-                    <div style={{ fontSize: '48px', marginBottom: '12px' }}>📊</div>
-                    <div style={{ fontSize: '16px', marginBottom: '4px' }}>No data available</div>
-                    <div style={{ fontSize: '13px' }}>
+                    <div style={{ fontSize: '48px', marginBottom: '12px', color: '#94a3b8' }}>📊</div>
+                    <div style={{ fontSize: '16px', marginBottom: '4px', color: '#1e293b' }}>No data available</div>
+                    <div style={{ fontSize: '13px', color: '#64748b' }}>
                         Select a ticker and period to view stock data
                     </div>
                 </div>
@@ -314,63 +317,99 @@ export default function Analysis() {
             {/* Loading skeleton */}
             {loading && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
-                    {[...Array(5)].map((_, i) => (
-                        <MetricCard key={i} isLoading={true} />
+                    {[...Array(8)].map((_, i) => (
+                        <div key={i} style={metricCardStyle}>
+                            <div style={{ height: '12px', background: '#e2e8f0', borderRadius: '4px', marginBottom: '8px' }}></div>
+                            <div style={{ height: '20px', background: '#e2e8f0', borderRadius: '4px', width: '60%' }}></div>
+                        </div>
                     ))}
                 </div>
             )}
 
-            {/* Metrics Grid */}
+            {/* Metrics Grid - All boxes with smaller font sizes */}
             {isReady && metrics && (
                 <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
                     gap: '12px'
                 }}>
-                    <PriceCard
-                        label="Latest Close"
-                        value={metrics.latest.close}
-                        sub={`${metrics.latest.date}`}
-                    />
-                    <MetricCard
-                        label="Period High"
-                        value={`$${stats?.price?.high?.toFixed(2) || '—'}`}
-                        color="#22c55e"
-                    />
-                    <MetricCard
-                        label="Period Low"
-                        value={`$${stats?.price?.low?.toFixed(2) || '—'}`}
-                        color="#ef4444"
-                    />
-                    <ChangeCard
-                        label="Period Change"
-                        value={`${metrics.priceChange > 0 ? '+' : ''}${metrics.priceChange.toFixed(2)}%`}
-                        change={metrics.priceChange}
-                        sub={`$${Math.abs(metrics.priceChangeAbs).toFixed(2)}`}
-                    />
-                    <MetricCard
-                        label="Volatility"
-                        value={`${metrics.volatility.toFixed(2)}%`}
-                        color="#f59e0b"
-                        sub="Annualized"
-                    />
-                    <MetricCard
-                        label="MA Signal"
-                        value={metrics.maSignal}
-                        color={metrics.maSignal === 'Golden Cross' ? '#22c55e' : '#ef4444'}
-                        sub={`SMA20: $${metrics.sma20.toFixed(2)} | SMA50: $${metrics.sma50.toFixed(2)}`}
-                    />
-                    <VolumeCard
-                        label="Avg Volume"
-                        value={metrics.avgVolume10.toLocaleString()}
-                        sub={`${metrics.volumeRatio > 1 ? 'Above' : 'Below'} average`}
-                    />
-                    <MetricCard
-                        label="Total Records"
-                        value={stats?.records || data.length}
-                        color="#64748b"
-                        sub={`${stats?.dateRange?.start} → ${stats?.dateRange?.end}`}
-                    />
+                    {/* Latest Close Card */}
+                    <div style={metricCardStyle}>
+                        <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>LATEST CLOSE</div>
+                        <div style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b' }}>
+                            ${metrics.latest.close.toFixed(2)}
+                        </div>
+                        <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '4px' }}>{metrics.latest.date}</div>
+                    </div>
+
+                    {/* Period High Card */}
+                    <div style={metricCardStyle}>
+                        <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>PERIOD HIGH</div>
+                        <div style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b' }}>
+                            ${stats?.price?.high?.toFixed(2) || '—'}
+                        </div>
+                    </div>
+
+                    {/* Period Low Card */}
+                    <div style={metricCardStyle}>
+                        <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>PERIOD LOW</div>
+                        <div style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b' }}>
+                            ${stats?.price?.low?.toFixed(2) || '—'}
+                        </div>
+                    </div>
+
+                    {/* Period Change Card */}
+                    <div style={metricCardStyle}>
+                        <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>PERIOD CHANGE</div>
+                        <div style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b' }}>
+                            {metrics.priceChange > 0 ? '↑' : metrics.priceChange < 0 ? '↓' : ''} {Math.abs(metrics.priceChange).toFixed(2)}%
+                        </div>
+                        <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '4px' }}>
+                            ${Math.abs(metrics.priceChangeAbs).toFixed(2)}
+                        </div>
+                    </div>
+
+                    {/* Volatility Card */}
+                    <div style={metricCardStyle}>
+                        <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>VOLATILITY</div>
+                        <div style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b' }}>
+                            {metrics.volatility.toFixed(2)}%
+                        </div>
+                        <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '4px' }}>Annualized</div>
+                    </div>
+
+                    {/* MA Signal Card */}
+                    <div style={metricCardStyle}>
+                        <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>MA SIGNAL</div>
+                        <div style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b' }}>
+                            {metrics.maSignal}
+                        </div>
+                        <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '4px' }}>
+                            SMA20: ${metrics.sma20.toFixed(2)} | SMA50: ${metrics.sma50.toFixed(2)}
+                        </div>
+                    </div>
+
+                    {/* Avg Volume Card */}
+                    <div style={metricCardStyle}>
+                        <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>AVG VOLUME</div>
+                        <div style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b' }}>
+                            {metrics.avgVolume10.toLocaleString()}
+                        </div>
+                        <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '4px' }}>
+                            {metrics.volumeRatio > 1 ? 'Above average' : 'Below average'}
+                        </div>
+                    </div>
+
+                    {/* Total Records Card */}
+                    <div style={metricCardStyle}>
+                        <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>TOTAL RECORDS</div>
+                        <div style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b' }}>
+                            {stats?.records || data.length}
+                        </div>
+                        <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '4px' }}>
+                            {stats?.dateRange?.start} → {stats?.dateRange?.end}
+                        </div>
+                    </div>
                 </div>
             )}
 

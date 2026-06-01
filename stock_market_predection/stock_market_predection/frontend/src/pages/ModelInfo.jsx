@@ -63,20 +63,6 @@ const actualFeatures = [
         ]
     },
     {
-        category: 'Technical Indicators (calculated)',
-        items: [
-            'RSI (14-period)',
-            'MACD (12, 26, 9)',
-            'MACD Signal Line',
-            'MACD Histogram',
-            'Bollinger Bands (Upper)',
-            'Bollinger Bands (Middle - SMA20)',
-            'Bollinger Bands (Lower)',
-            '%B Indicator',
-            'Bollinger Bandwidth',
-        ]
-    },
-    {
         category: 'Moving Averages',
         items: [
             'MA-7 (Short-term trend)',
@@ -105,7 +91,7 @@ const actualFeatures = [
 
 const actualSpecs = [
     { label: 'Architecture', value: 'LSTM + Multi-Head Attention' },
-    { label: 'Input Features', value: '5 base + 15+ engineered' },
+    { label: 'Input Features', value: '5 base + engineered' },
     { label: 'Sequence Length', value: '60 trading days' },
     { label: 'LSTM Hidden Size', value: '128' },
     { label: 'LSTM Layers', value: '2' },
@@ -121,32 +107,11 @@ const actualSpecs = [
     { label: 'Device', value: 'CPU (CUDA if available)' },
 ]
 
-const modelVariants = [
-    {
-        name: 'LSTM-Attention',
-        description: 'Primary model. LSTM captures temporal dependencies, attention mechanism identifies important time steps.',
-        status: 'Implemented',
-        color: '#22c55e'
-    },
-    {
-        name: 'CNN-LSTM Hybrid',
-        description: 'Alternative architecture. CNN extracts local patterns before LSTM processes sequences.',
-        status: 'Available',
-        color: '#f59e0b'
-    },
-    {
-        name: 'Transformer',
-        description: 'Experimental. Positional encoding + self-attention for parallel sequence processing.',
-        status: 'Experimental',
-        color: '#3b82f6'
-    }
-]
-
 export default function ModelInfo() {
     const [activeTab, setActiveTab] = useState('architecture')
 
     return (
-        <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1200px', margin: '0 auto' }}>
+        <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1200px', margin: '0 auto', background: '#f8fafc', minHeight: '100vh' }}>
 
             <div>
                 <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#1e293b', margin: 0 }}>
@@ -157,36 +122,36 @@ export default function ModelInfo() {
                 </p>
             </div>
 
+            {/* Only LSTM-Attention Model Box - Removed CNN-LSTM and Transformer */}
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                gridTemplateColumns: '1fr',
                 gap: '12px'
             }}>
-                {modelVariants.map(variant => (
-                    <div key={variant.name} style={{
-                        ...card,
-                        borderLeft: `3px solid ${variant.color}`
-                    }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                            <h3 style={{ color: '#1e293b', fontSize: '14px', margin: 0 }}>{variant.name}</h3>
-                            <span style={{
-                                background: `${variant.color}20`,
-                                color: variant.color,
-                                padding: '2px 8px',
-                                borderRadius: '12px',
-                                fontSize: '10px',
-                                fontWeight: '600'
-                            }}>
-                                {variant.status}
-                            </span>
-                        </div>
-                        <p style={{ color: '#64748b', fontSize: '12px', lineHeight: '1.6', margin: 0 }}>
-                            {variant.description}
-                        </p>
+                <div style={{
+                    ...card,
+                    borderLeft: '3px solid #22c55e'
+                }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <h3 style={{ color: '#1e293b', fontSize: '14px', margin: 0 }}>LSTM-Attention</h3>
+                        <span style={{
+                            background: '#22c55e20',
+                            color: '#22c55e',
+                            padding: '2px 8px',
+                            borderRadius: '12px',
+                            fontSize: '10px',
+                            fontWeight: '600'
+                        }}>
+                            Implemented
+                        </span>
                     </div>
-                ))}
+                    <p style={{ color: '#64748b', fontSize: '12px', lineHeight: '1.6', margin: 0 }}>
+                        Primary model. LSTM captures temporal dependencies, attention mechanism identifies important time steps.
+                    </p>
+                </div>
             </div>
 
+            {/* Tabs */}
             <div style={{ display: 'flex', gap: '4px', background: '#f1f5f9', padding: '4px', borderRadius: '8px', width: 'fit-content' }}>
                 {[
                     { key: 'architecture', label: 'Architecture' },
@@ -214,6 +179,7 @@ export default function ModelInfo() {
                 ))}
             </div>
 
+            {/* Architecture View */}
             {activeTab === 'architecture' && (
                 <div style={card}>
                     <div style={{ fontSize: '13px', fontWeight: '500', color: '#475569', marginBottom: '16px' }}>
@@ -287,10 +253,11 @@ export default function ModelInfo() {
                 </div>
             )}
 
+            {/* Features View - Removed Technical Indicators */}
             {activeTab === 'features' && (
                 <div style={card}>
                     <div style={{ fontSize: '13px', fontWeight: '500', color: '#475569', marginBottom: '16px' }}>
-                        Input Features & Technical Indicators
+                        Input Features
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
                         {actualFeatures.map((category, i) => (
@@ -345,12 +312,12 @@ export default function ModelInfo() {
                         lineHeight: '1.6'
                     }}>
                         <strong style={{ color: '#2563eb' }}>Note:</strong> Features are engineered from raw OHLCV data
-                        obtained via Yahoo Finance (yfinance). Technical indicators are calculated in real-time
-                        before being fed into the model.
+                        obtained via Yahoo Finance (yfinance).
                     </div>
                 </div>
             )}
 
+            {/* Specifications View */}
             {activeTab === 'specs' && (
                 <div style={card}>
                     <div style={{ fontSize: '13px', fontWeight: '500', color: '#475569', marginBottom: '14px' }}>
@@ -382,6 +349,7 @@ export default function ModelInfo() {
                 </div>
             )}
 
+            {/* Data Pipeline */}
             <div style={card}>
                 <div style={{ fontSize: '13px', fontWeight: '500', color: '#475569', marginBottom: '14px' }}>
                     Data Pipeline

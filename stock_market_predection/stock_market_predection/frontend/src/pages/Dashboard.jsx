@@ -30,12 +30,12 @@ const card = {
     boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
 }
 
-// Style for metric cards (boxes) - all consistent
+// Style for metric cards (boxes) - all consistent with black text
 const metricCardStyle = {
     background: '#ffffff',
     border: '1px solid #e2e8f0',
     borderRadius: '12px',
-    padding: '16px',
+    padding: '14px',
     boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
 }
 
@@ -118,6 +118,13 @@ export default function Dashboard() {
 
     const selectedTickerName = TICKERS.find(t => t.symbol === ticker)?.name || ticker
 
+    // Get signal text without emoji
+    const getSignalText = (signal) => {
+        if (signal === 'BUY') return 'BUY'
+        if (signal === 'SELL') return 'SELL'
+        return 'HOLD'
+    }
+
     return (
         <div style={{
             padding: '24px',
@@ -139,8 +146,8 @@ export default function Dashboard() {
                 gap: '12px'
             }}>
                 <div>
-                    <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#1e293b', margin: 0 }}>
-                        Stock Prediction Dashboard
+                    <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#2563eb', margin: 0 }}>
+                        Stock Trend Prediction
                     </h1>
                     <p style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>
                         {selectedTickerName} • LSTM-Attention Model • Real-time Inference
@@ -267,7 +274,7 @@ export default function Dashboard() {
                 </div>
             )}
 
-            {/* Metrics Cards - All using same consistent style */}
+            {/* Metrics Cards - All black text, smaller font */}
             <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
@@ -275,49 +282,58 @@ export default function Dashboard() {
             }}>
                 {/* Current Price Card */}
                 <div style={metricCardStyle}>
-                    <div style={{ fontSize: '11px', fontWeight: '500', color: '#64748b', marginBottom: '4px' }}>CURRENT PRICE</div>
-                    <div style={{ fontSize: '24px', fontWeight: '700', color: '#1e293b' }}>
+                    <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>CURRENT PRICE</div>
+                    <div style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b' }}>
                         {stockLoading ? '...' : (result ? result.current_price : (stockStats?.price?.current || '—'))}
                     </div>
-                    <div style={{ fontSize: '10px', color: '#94a3b8', marginTop: '4px' }}>{ticker}</div>
+                    <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '4px' }}>{ticker}</div>
                 </div>
 
-                {/* Predicted Price Card - Fixed */}
+                {/* Predicted Price Card */}
                 <div style={metricCardStyle}>
-                    <div style={{ fontSize: '11px', fontWeight: '500', color: '#64748b', marginBottom: '4px' }}>PREDICTED PRICE</div>
-                    <div style={{ fontSize: '24px', fontWeight: '700', color: '#2563eb' }}>
+                    <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>PREDICTED PRICE</div>
+                    <div style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b' }}>
                         {predLoading ? '...' : (result ? result.predicted_price : '—')}
                     </div>
-                    <div style={{ fontSize: '10px', color: '#94a3b8', marginTop: '4px' }}>{result ? horizon : 'Run prediction'}</div>
+                    <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '4px' }}>{result ? horizon : 'Run prediction'}</div>
                 </div>
 
                 {/* Expected Change Card */}
                 <div style={metricCardStyle}>
-                    <div style={{ fontSize: '11px', fontWeight: '500', color: '#64748b', marginBottom: '4px' }}>EXPECTED CHANGE</div>
-                    <div style={{ fontSize: '24px', fontWeight: '700', color: result?.change_pct > 0 ? '#22c55e' : result?.change_pct < 0 ? '#ef4444' : '#64748b' }}>
+                    <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>EXPECTED CHANGE</div>
+                    <div style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b' }}>
                         {predLoading ? '...' : (result ? `${result.change_pct > 0 ? '+' : ''}${result.change_pct}%` : '—')}
                     </div>
                 </div>
 
-                {/* Confidence Card - Fixed */}
+                {/* Confidence Card */}
                 <div style={metricCardStyle}>
-                    <div style={{ fontSize: '11px', fontWeight: '500', color: '#64748b', marginBottom: '4px' }}>CONFIDENCE</div>
-                    <div style={{ fontSize: '24px', fontWeight: '700', color: result?.confidence > 80 ? '#22c55e' : result?.confidence > 60 ? '#f59e0b' : '#ef4444' }}>
+                    <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>CONFIDENCE</div>
+                    <div style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b' }}>
                         {predLoading ? '...' : (result ? `${result.confidence}%` : '—')}
                     </div>
                 </div>
 
-                {/* Signal Badge Card */}
+                {/* Signal Badge Card - No emoji */}
                 <div style={metricCardStyle}>
                     {result ? (
-                        <PredictionBadge
-                            prediction={result.change_pct}
-                            confidence={result.confidence}
-                            size="large"
-                        />
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>SIGNAL</div>
+                            <div style={{ 
+                                fontSize: '20px', 
+                                fontWeight: '700', 
+                                color: result.signal === 'BUY' ? '#22c55e' : result.signal === 'SELL' ? '#ef4444' : '#f59e0b',
+                                textTransform: 'uppercase'
+                            }}>
+                                {getSignalText(result.signal)}
+                            </div>
+                            <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '4px' }}>
+                                Confidence: {result.confidence}%
+                            </div>
+                        </div>
                     ) : (
                         <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '11px', fontWeight: '500', color: '#64748b', marginBottom: '4px' }}>SIGNAL</div>
+                            <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>SIGNAL</div>
                             <div style={{ fontSize: '14px', color: '#94a3b8' }}>Awaiting prediction</div>
                         </div>
                     )}
@@ -377,48 +393,59 @@ export default function Dashboard() {
             {/* Prediction Results */}
             {result && (
                 <>
-                    {/* Technical Indicators */}
+                    {/* Technical Indicators - All black text, smaller font */}
                     <div style={{
                         display: 'grid',
                         gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
                         gap: '10px'
                     }}>
+                        {/* RSI Card */}
                         <div style={metricCardStyle}>
-                            <div style={{ fontSize: '11px', fontWeight: '500', color: '#64748b', marginBottom: '4px' }}>RSI (14)</div>
-                            <div style={{ fontSize: '24px', fontWeight: '700', color: result.indicators.rsi > 70 ? '#ef4444' : result.indicators.rsi < 30 ? '#22c55e' : '#1e293b' }}>
+                            <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>RSI (14)</div>
+                            <div style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b' }}>
                                 {result.indicators.rsi}
                             </div>
-                            <div style={{ fontSize: '10px', color: '#94a3b8', marginTop: '4px' }}>
+                            <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '4px' }}>
                                 {result.indicators.rsi > 70 ? 'Overbought' : result.indicators.rsi < 30 ? 'Oversold' : 'Neutral'}
                             </div>
                         </div>
+
+                        {/* MACD Card */}
                         <div style={metricCardStyle}>
-                            <div style={{ fontSize: '11px', fontWeight: '500', color: '#64748b', marginBottom: '4px' }}>MACD</div>
-                            <div style={{ fontSize: '20px', fontWeight: '700', color: result.indicators.macd.includes('Bullish') ? '#22c55e' : '#ef4444' }}>
+                            <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>MACD</div>
+                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b' }}>
                                 {result.indicators.macd}
                             </div>
                         </div>
+
+                        {/* Bollinger Bands Card */}
                         <div style={metricCardStyle}>
-                            <div style={{ fontSize: '11px', fontWeight: '500', color: '#64748b', marginBottom: '4px' }}>BOLLINGER BANDS</div>
-                            <div style={{ fontSize: '16px', fontWeight: '600', color: '#1e293b' }}>
+                            <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>BOLLINGER BANDS</div>
+                            <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>
                                 {result.indicators.bollinger}
                             </div>
                         </div>
+
+                        {/* Volume Trend Card */}
                         <div style={metricCardStyle}>
-                            <div style={{ fontSize: '11px', fontWeight: '500', color: '#64748b', marginBottom: '4px' }}>VOLUME TREND</div>
-                            <div style={{ fontSize: '16px', fontWeight: '600', color: '#1e293b' }}>
+                            <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>VOLUME TREND</div>
+                            <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>
                                 {result.indicators.volume_trend}
                             </div>
                         </div>
+
+                        {/* Sentiment Badge */}
                         <div style={metricCardStyle}>
                             <SentimentBadge score={result.indicators.sentiment_score} />
                         </div>
+
+                        {/* Beta Card */}
                         <div style={metricCardStyle}>
-                            <div style={{ fontSize: '11px', fontWeight: '500', color: '#64748b', marginBottom: '4px' }}>BETA</div>
-                            <div style={{ fontSize: '20px', fontWeight: '700', color: result.indicators.beta > 1.5 ? '#ef4444' : result.indicators.beta < 0.5 ? '#22c55e' : '#f59e0b' }}>
+                            <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>BETA</div>
+                            <div style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b' }}>
                                 {result.indicators.beta}
                             </div>
-                            <div style={{ fontSize: '10px', color: '#94a3b8', marginTop: '4px' }}>
+                            <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '4px' }}>
                                 {result.indicators.beta > 1.5 ? 'High Risk' : result.indicators.beta < 0.5 ? 'Low Risk' : 'Moderate Risk'}
                             </div>
                         </div>
@@ -498,7 +525,13 @@ export default function Dashboard() {
                                         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                                             <span style={{ color: '#475569' }}>{item.ticker}</span>
                                             <span style={{ color: '#94a3b8' }}>{item.horizon}</span>
-                                            <SignalBadge signal={item.prediction.signal} size="small" />
+                                            <span style={{ 
+                                                color: item.prediction.signal === 'BUY' ? '#22c55e' : item.prediction.signal === 'SELL' ? '#ef4444' : '#f59e0b',
+                                                fontWeight: '600',
+                                                fontSize: '11px'
+                                            }}>
+                                                {getSignalText(item.prediction.signal)}
+                                            </span>
                                         </div>
                                         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                                             <span style={{ color: item.prediction.change_pct > 0 ? '#22c55e' : '#ef4444' }}>
