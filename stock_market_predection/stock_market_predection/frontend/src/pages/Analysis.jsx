@@ -12,7 +12,15 @@ const TICKERS = [
     { symbol: 'MSFT', name: 'Microsoft Corp.' },
     { symbol: 'NVDA', name: 'NVIDIA Corp.' },
     { symbol: 'AMZN', name: 'Amazon.com Inc.' },
-    { symbol: 'META', name: 'Meta Platforms Inc.' }
+    { symbol: 'META', name: 'Meta Platforms Inc.' },
+    { symbol: 'NFLX', name: 'Netflix Inc.' },
+    { symbol: 'AMD', name: 'Advanced Micro Devices' },
+    { symbol: 'INTC', name: 'Intel Corp.' },
+    { symbol: 'IBM', name: 'IBM Corp.' },
+    { symbol: 'ORCL', name: 'Oracle Corp.' },
+    { symbol: 'ADBE', name: 'Adobe Inc.' },
+    { symbol: 'CRM', name: 'Salesforce Inc.' },
+    { symbol: 'PYPL', name: 'PayPal Holdings Inc.' }
 ]
 
 const PERIODS = [
@@ -115,7 +123,7 @@ export default function Analysis() {
         }
     }, [data])
 
-    // Chart data with comparison
+    // Chart data with comparison - NORMALIZED for fair comparison
     const chartData = useMemo(() => {
         const mainData = data.map(d => ({
             date: d.date,
@@ -124,14 +132,29 @@ export default function Analysis() {
         }))
 
         if (comparisonMode && compareData && compareData.length > 0) {
-            // Normalize comparison data to same scale
+            // Normalize both stocks to percentage change from start (100%)
             const mainFirst = data[0]?.close || 1
             const compareFirst = compareData[0]?.close || 1
-            const ratio = mainFirst / compareFirst
-
-            return mainData.map((d, i) => ({
+            
+            // Create normalized data for main stock (percentage)
+            const normalizedMain = mainData.map(d => ({
+                date: d.date,
+                close: ((d.close - mainFirst) / mainFirst * 100) + 100,
+                volume: d.volume,
+                isPercentage: true
+            }))
+            
+            // Create normalized data for comparison stock (percentage)
+            const normalizedCompare = compareData.map((d, i) => ({
+                date: d.date,
+                compare: ((d.close - compareFirst) / compareFirst * 100) + 100,
+                volume: d.volume
+            }))
+            
+            // Merge both datasets
+            return normalizedMain.map((d, i) => ({
                 ...d,
-                compare: compareData[i] ? compareData[i].close * ratio : null
+                compare: normalizedCompare[i]?.compare || null
             }))
         }
 
@@ -155,6 +178,32 @@ export default function Analysis() {
         a.click()
         URL.revokeObjectURL(url)
     }, [data, ticker, period])
+
+    // Calculate comparison stats when in comparison mode
+    const comparisonStats = useMemo(() => {
+        if (!comparisonMode || !data || !compareData || data.length === 0 || compareData.length === 0) {
+            return null
+        }
+
+        const primaryFirst = data[0]?.close
+        const primaryLast = data[data.length - 1]?.close
+        const compareFirst = compareData[0]?.close
+        const compareLast = compareData[compareData.length - 1]?.close
+
+        const primaryChange = primaryFirst ? ((primaryLast - primaryFirst) / primaryFirst * 100) : 0
+        const compareChange = compareFirst ? ((compareLast - compareFirst) / compareFirst * 100) : 0
+        const difference = primaryChange - compareChange
+
+        return {
+            primaryCurrent: primaryLast,
+            compareCurrent: compareLast,
+            primaryChange: primaryChange,
+            compareChange: compareChange,
+            difference: difference,
+            bestPerformer: primaryChange > compareChange ? ticker : compareTicker,
+            bestPerformance: Math.max(primaryChange, compareChange)
+        }
+    }, [comparisonMode, data, compareData, ticker, compareTicker])
 
     return (
         <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1400px', margin: '0 auto', background: '#f8fafc', minHeight: '100vh' }}>
@@ -189,7 +238,7 @@ export default function Analysis() {
                             borderRadius: '8px',
                             fontSize: '13px',
                             cursor: 'pointer',
-                            minWidth: '120px'
+                            minWidth: '140px'
                         }}
                     >
                         {TICKERS.map(t => (
@@ -238,7 +287,7 @@ export default function Analysis() {
             </div>
 
             {/* Comparison mode toggle */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input
                         type="checkbox"
@@ -256,13 +305,17 @@ export default function Analysis() {
                             background: '#ffffff',
                             border: '1px solid #e2e8f0',
                             color: '#1e293b',
-                            padding: '6px 10px',
-                            borderRadius: '6px',
-                            fontSize: '12px'
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            fontSize: '13px',
+                            minWidth: '140px',
+                            cursor: 'pointer'
                         }}
                     >
                         {TICKERS.filter(t => t.symbol !== ticker).map(t => (
-                            <option key={t.symbol} value={t.symbol}>{t.symbol}</option>
+                            <option key={t.symbol} value={t.symbol}>
+                                {t.symbol} - {t.name}
+                            </option>
                         ))}
                     </select>
                 )}
@@ -317,7 +370,7 @@ export default function Analysis() {
             {/* Loading skeleton */}
             {loading && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
-                    {[...Array(8)].map((_, i) => (
+                    {[...Array(5)].map((_, i) => (
                         <div key={i} style={metricCardStyle}>
                             <div style={{ height: '12px', background: '#e2e8f0', borderRadius: '4px', marginBottom: '8px' }}></div>
                             <div style={{ height: '20px', background: '#e2e8f0', borderRadius: '4px', width: '60%' }}></div>
@@ -326,8 +379,8 @@ export default function Analysis() {
                 </div>
             )}
 
-            {/* Metrics Grid - All boxes with smaller font sizes */}
-            {isReady && metrics && (
+            {/* Metrics Grid - Single Stock Mode */}
+            {!comparisonMode && isReady && metrics && (
                 <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
@@ -361,42 +414,11 @@ export default function Analysis() {
                     {/* Period Change Card */}
                     <div style={metricCardStyle}>
                         <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>PERIOD CHANGE</div>
-                        <div style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b' }}>
+                        <div style={{ fontSize: '18px', fontWeight: '700', color: metrics.priceChange > 0 ? '#22c55e' : '#ef4444' }}>
                             {metrics.priceChange > 0 ? '↑' : metrics.priceChange < 0 ? '↓' : ''} {Math.abs(metrics.priceChange).toFixed(2)}%
                         </div>
                         <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '4px' }}>
                             ${Math.abs(metrics.priceChangeAbs).toFixed(2)}
-                        </div>
-                    </div>
-
-                    {/* Volatility Card */}
-                    <div style={metricCardStyle}>
-                        <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>VOLATILITY</div>
-                        <div style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b' }}>
-                            {metrics.volatility.toFixed(2)}%
-                        </div>
-                        <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '4px' }}>Annualized</div>
-                    </div>
-
-                    {/* MA Signal Card */}
-                    <div style={metricCardStyle}>
-                        <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>MA SIGNAL</div>
-                        <div style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b' }}>
-                            {metrics.maSignal}
-                        </div>
-                        <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '4px' }}>
-                            SMA20: ${metrics.sma20.toFixed(2)} | SMA50: ${metrics.sma50.toFixed(2)}
-                        </div>
-                    </div>
-
-                    {/* Avg Volume Card */}
-                    <div style={metricCardStyle}>
-                        <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>AVG VOLUME</div>
-                        <div style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b' }}>
-                            {metrics.avgVolume10.toLocaleString()}
-                        </div>
-                        <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '4px' }}>
-                            {metrics.volumeRatio > 1 ? 'Above average' : 'Below average'}
                         </div>
                     </div>
 
@@ -408,6 +430,62 @@ export default function Analysis() {
                         </div>
                         <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '4px' }}>
                             {stats?.dateRange?.start} → {stats?.dateRange?.end}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* COMPARISON MODE METRICS - Comparison Cards */}
+            {comparisonMode && comparisonStats && (
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                    gap: '12px'
+                }}>
+                    {/* Primary Stock Current Card */}
+                    <div style={metricCardStyle}>
+                        <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>
+                            {ticker} CURRENT
+                        </div>
+                        <div style={{ fontSize: '18px', fontWeight: '700', color: '#2563eb' }}>
+                            ${comparisonStats.primaryCurrent?.toFixed(2) || '—'}
+                        </div>
+                    </div>
+
+                    {/* Comparison Stock Current Card */}
+                    <div style={metricCardStyle}>
+                        <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>
+                            {compareTicker} CURRENT
+                        </div>
+                        <div style={{ fontSize: '18px', fontWeight: '700', color: '#22c55e' }}>
+                            ${comparisonStats.compareCurrent?.toFixed(2) || '—'}
+                        </div>
+                    </div>
+
+                    {/* Performance Comparison Card */}
+                    <div style={metricCardStyle}>
+                        <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>
+                            {ticker} vs {compareTicker}
+                        </div>
+                        <div style={{ fontSize: '18px', fontWeight: '700', color: comparisonStats.difference > 0 ? '#22c55e' : '#ef4444' }}>
+                            {comparisonStats.difference > 0 ? '+' : ''}{comparisonStats.difference.toFixed(2)}%
+                        </div>
+                        <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '4px' }}>
+                            {ticker}: {comparisonStats.primaryChange > 0 ? '+' : ''}{comparisonStats.primaryChange.toFixed(2)}% | 
+                            {compareTicker}: {comparisonStats.compareChange > 0 ? '+' : ''}{comparisonStats.compareChange.toFixed(2)}%
+                        </div>
+                    </div>
+
+                    {/* Best Performer Card */}
+                    <div style={metricCardStyle}>
+                        <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>
+                            BEST PERFORMER
+                        </div>
+                        <div style={{ fontSize: '18px', fontWeight: '700', color: '#f59e0b' }}>
+                            {comparisonStats.bestPerformer}
+                        </div>
+                        <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '4px' }}>
+                            +{comparisonStats.bestPerformance.toFixed(2)}% gain
                         </div>
                     </div>
                 </div>
@@ -439,14 +517,16 @@ export default function Analysis() {
                 </div>
             )}
 
-            {/* Price Chart */}
+            {/* Price Chart - REMOVED Current, Predicted, Change, Signal boxes */}
             {isReady && view === VIEWS.CHART && (
                 <div style={card}>
                     <div style={{
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        marginBottom: '16px'
+                        marginBottom: '16px',
+                        flexWrap: 'wrap',
+                        gap: '12px'
                     }}>
                         <span style={{ fontSize: '13px', fontWeight: '500', color: '#475569' }}>
                             {ticker} · {PERIODS.find(p => p.value === period)?.label} · {comparisonMode ? `vs ${compareTicker}` : 'Price Chart'}
@@ -466,43 +546,98 @@ export default function Analysis() {
                             Export CSV
                         </button>
                     </div>
+                    
+                    {/* PriceChart - Removed forecast, lower bound, upper bound from legend */}
                     <PriceChart
                         data={chartData}
                         comparisonData={comparisonMode ? compareData : null}
+                        comparisonLabel={comparisonMode ? compareTicker : null}
+                        showLegend={true}
+                        showConfidenceInterval={false}
                     />
+                    
+                    {/* REMOVED the "Both stocks normalized to start at 100%" message */}
                 </div>
             )}
 
-            {/* Statistics View */}
+            {/* Statistics View - Cleaned up version */}
             {isReady && view === VIEWS.STATS && (
                 <div style={card}>
                     <div style={{ fontSize: '13px', fontWeight: '500', color: '#475569', marginBottom: '16px' }}>
                         Statistical Summary
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
-                        {/* Price statistics */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
+                        {/* Price statistics - Cleaned */}
                         <div>
-                            <h4 style={{ color: '#64748b', fontSize: '11px', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>PRICE STATISTICS</h4>
-                            {stats?.price && Object.entries(stats.price).map(([key, value]) => (
-                                <div key={key} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '12px' }}>
-                                    <span style={{ color: '#64748b' }}>{key}</span>
-                                    <span style={{ color: '#1e293b', fontFamily: 'monospace' }}>
-                                        {typeof value === 'number' ? value.toFixed(2) : value}
+                            <h4 style={{ color: '#2563eb', fontSize: '12px', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>PRICE STATISTICS</h4>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '0.5px solid #e2e8f0' }}>
+                                    <span style={{ color: '#64748b', fontSize: '12px' }}>Current Price</span>
+                                    <span style={{ color: '#1e293b', fontFamily: 'monospace', fontWeight: '600' }}>${stats?.price?.current?.toFixed(2) || '—'}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '0.5px solid #e2e8f0' }}>
+                                    <span style={{ color: '#64748b', fontSize: '12px' }}>Period High</span>
+                                    <span style={{ color: '#22c55e', fontFamily: 'monospace', fontWeight: '600' }}>${stats?.price?.high?.toFixed(2) || '—'}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '0.5px solid #e2e8f0' }}>
+                                    <span style={{ color: '#64748b', fontSize: '12px' }}>Period Low</span>
+                                    <span style={{ color: '#ef4444', fontFamily: 'monospace', fontWeight: '600' }}>${stats?.price?.low?.toFixed(2) || '—'}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '0.5px solid #e2e8f0' }}>
+                                    <span style={{ color: '#64748b', fontSize: '12px' }}>Average Price</span>
+                                    <span style={{ color: '#1e293b', fontFamily: 'monospace', fontWeight: '600' }}>${stats?.price?.average?.toFixed(2) || '—'}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
+                                    <span style={{ color: '#64748b', fontSize: '12px' }}>Period Change</span>
+                                    <span style={{ color: metrics?.priceChange > 0 ? '#22c55e' : '#ef4444', fontFamily: 'monospace', fontWeight: '600' }}>
+                                        {metrics?.priceChange > 0 ? '+' : ''}{metrics?.priceChange?.toFixed(2) || '0'}%
                                     </span>
                                 </div>
-                            ))}
+                            </div>
                         </div>
-                        {/* Volume statistics */}
+
+                        {/* Volume statistics - Cleaned */}
                         <div>
-                            <h4 style={{ color: '#64748b', fontSize: '11px', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>VOLUME STATISTICS</h4>
-                            {stats?.volume && Object.entries(stats.volume).map(([key, value]) => (
-                                <div key={key} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '12px' }}>
-                                    <span style={{ color: '#64748b' }}>{key}</span>
-                                    <span style={{ color: '#1e293b', fontFamily: 'monospace' }}>
-                                        {typeof value === 'number' ? value.toLocaleString() : value}
+                            <h4 style={{ color: '#2563eb', fontSize: '12px', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>VOLUME STATISTICS</h4>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '0.5px solid #e2e8f0' }}>
+                                    <span style={{ color: '#64748b', fontSize: '12px' }}>Average Volume</span>
+                                    <span style={{ color: '#1e293b', fontFamily: 'monospace', fontWeight: '600' }}>{(stats?.volume?.average / 1000000)?.toFixed(1) || '—'}M</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '0.5px solid #e2e8f0' }}>
+                                    <span style={{ color: '#64748b', fontSize: '12px' }}>Total Volume</span>
+                                    <span style={{ color: '#1e293b', fontFamily: 'monospace', fontWeight: '600' }}>{(stats?.volume?.total / 1000000)?.toFixed(0) || '—'}M</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '0.5px solid #e2e8f0' }}>
+                                    <span style={{ color: '#64748b', fontSize: '12px' }}>Max Daily Volume</span>
+                                    <span style={{ color: '#f59e0b', fontFamily: 'monospace', fontWeight: '600' }}>{(stats?.volume?.max / 1000000)?.toFixed(1) || '—'}M</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
+                                    <span style={{ color: '#64748b', fontSize: '12px' }}>Min Daily Volume</span>
+                                    <span style={{ color: '#64748b', fontFamily: 'monospace', fontWeight: '600' }}>{(stats?.volume?.min / 1000000)?.toFixed(1) || '—'}M</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Summary Statistics */}
+                        <div>
+                            <h4 style={{ color: '#2563eb', fontSize: '12px', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>SUMMARY</h4>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '0.5px solid #e2e8f0' }}>
+                                    <span style={{ color: '#64748b', fontSize: '12px' }}>Total Trading Days</span>
+                                    <span style={{ color: '#1e293b', fontFamily: 'monospace', fontWeight: '600' }}>{stats?.records || data?.length || '—'}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '0.5px solid #e2e8f0' }}>
+                                    <span style={{ color: '#64748b', fontSize: '12px' }}>Date Range</span>
+                                    <span style={{ color: '#1e293b', fontFamily: 'monospace', fontSize: '11px', fontWeight: '600' }}>
+                                        {stats?.dateRange?.start || '—'} → {stats?.dateRange?.end || '—'}
                                     </span>
                                 </div>
-                            ))}
+                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
+                                    <span style={{ color: '#64748b', fontSize: '12px' }}>Price Volatility</span>
+                                    <span style={{ color: '#f59e0b', fontFamily: 'monospace', fontWeight: '600' }}>{metrics?.volatility?.toFixed(2) || '—'}%</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -535,7 +670,7 @@ export default function Analysis() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {data.slice(-20).reverse().map((row, i) => {
+                                {data && data.slice(-20).reverse().map((row, i) => {
                                     const prevClose = data[data.indexOf(row) - 1]?.close
                                     const changePercent = prevClose
                                         ? ((row.close - prevClose) / prevClose * 100).toFixed(2)
@@ -552,11 +687,11 @@ export default function Analysis() {
                                             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                                         >
                                             <td style={{ padding: '8px 12px', color: '#64748b' }}>{row.date}</td>
-                                            <td style={{ padding: '8px 12px', color: '#475569' }}>${row.open.toFixed(2)}</td>
-                                            <td style={{ padding: '8px 12px', color: '#22c55e' }}>${row.high.toFixed(2)}</td>
-                                            <td style={{ padding: '8px 12px', color: '#ef4444' }}>${row.low.toFixed(2)}</td>
-                                            <td style={{ padding: '8px 12px', color: '#2563eb', fontWeight: '600' }}>${row.close.toFixed(2)}</td>
-                                            <td style={{ padding: '8px 12px', color: '#64748b' }}>{row.volume.toLocaleString()}</td>
+                                            <td style={{ padding: '8px 12px', color: '#475569' }}>${row.open?.toFixed(2)}</td>
+                                            <td style={{ padding: '8px 12px', color: '#22c55e' }}>${row.high?.toFixed(2)}</td>
+                                            <td style={{ padding: '8px 12px', color: '#ef4444' }}>${row.low?.toFixed(2)}</td>
+                                            <td style={{ padding: '8px 12px', color: '#2563eb', fontWeight: '600' }}>${row.close?.toFixed(2)}</td>
+                                            <td style={{ padding: '8px 12px', color: '#64748b' }}>{row.volume?.toLocaleString()}</td>
                                             <td style={{
                                                 padding: '8px 12px',
                                                 color: changePercent > 0 ? '#22c55e' : changePercent < 0 ? '#ef4444' : '#64748b',
