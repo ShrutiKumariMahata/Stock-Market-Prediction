@@ -13,8 +13,9 @@ export default function PriceChart({
     height = 280,
     currentPrice = null,
     predictedPrice = null,
-    comparisonData = null,        // ← ADDED: For comparison stock data
-    comparisonLabel = null        // ← ADDED: Label for comparison stock
+    comparisonData = null,
+    comparisonLabel = null,
+    showStatsCards = true        // ← NEW PROP - defaults to true for Dashboard
 }) {
     const [chartData, setChartData] = useState([])
     const [stats, setStats] = useState({
@@ -284,70 +285,72 @@ export default function PriceChart({
 
     return (
         <div>
-            {/* Price Stats */}
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
-                gap: '8px',
-                marginBottom: '12px',
-                fontSize: '11px'
-            }}>
+            {/* Price Stats - Only show if showStatsCards is true */}
+            {showStatsCards && (
                 <div style={{
-                    background: '#eff6ff',
-                    padding: '8px',
-                    borderRadius: '6px',
-                    textAlign: 'center'
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+                    gap: '8px',
+                    marginBottom: '12px',
+                    fontSize: '11px'
                 }}>
-                    <div style={{ color: '#64748b', fontSize: '10px' }}>Current</div>
-                    <div style={{ color: '#2563eb', fontWeight: 'bold', fontSize: '14px' }}>
-                        ${displayCurrent.toFixed(2)}
-                    </div>
-                </div>
-
-                <div style={{
-                    background: '#cffafe',
-                    padding: '8px',
-                    borderRadius: '6px',
-                    textAlign: 'center'
-                }}>
-                    <div style={{ color: '#64748b', fontSize: '10px' }}>Predicted</div>
-                    <div style={{ color: '#06b6d4', fontWeight: 'bold', fontSize: '14px' }}>
-                        ${displayPredicted.toFixed(2)}
-                    </div>
-                </div>
-
-                <div style={{
-                    background: changePercent > 0 ? '#f0fdf4' : '#fef2f2',
-                    padding: '8px',
-                    borderRadius: '6px',
-                    textAlign: 'center'
-                }}>
-                    <div style={{ color: '#64748b', fontSize: '10px' }}>Change</div>
                     <div style={{
-                        color: changePercent > 0 ? '#22c55e' : '#ef4444',
-                        fontWeight: 'bold',
-                        fontSize: '14px'
+                        background: '#eff6ff',
+                        padding: '8px',
+                        borderRadius: '6px',
+                        textAlign: 'center'
                     }}>
-                        {changePercent > 0 ? '+' : ''}{changePercent.toFixed(2)}%
+                        <div style={{ color: '#64748b', fontSize: '10px' }}>Current</div>
+                        <div style={{ color: '#2563eb', fontWeight: 'bold', fontSize: '14px' }}>
+                            ${displayCurrent.toFixed(2)}
+                        </div>
                     </div>
-                </div>
 
-                <div style={{
-                    background: changePercent > 5 ? '#f0fdf4' : changePercent < -5 ? '#fef2f2' : '#fefce8',
-                    padding: '8px',
-                    borderRadius: '6px',
-                    textAlign: 'center'
-                }}>
-                    <div style={{ color: '#64748b', fontSize: '10px' }}>Signal</div>
                     <div style={{
-                        color: changePercent > 5 ? '#22c55e' : changePercent < -5 ? '#ef4444' : '#eab308',
-                        fontWeight: 'bold',
-                        fontSize: '14px'
+                        background: '#cffafe',
+                        padding: '8px',
+                        borderRadius: '6px',
+                        textAlign: 'center'
                     }}>
-                        {changePercent > 5 ? 'BUY' : changePercent < -5 ? 'SELL' : 'HOLD'}
+                        <div style={{ color: '#64748b', fontSize: '10px' }}>Predicted</div>
+                        <div style={{ color: '#06b6d4', fontWeight: 'bold', fontSize: '14px' }}>
+                            ${displayPredicted.toFixed(2)}
+                        </div>
+                    </div>
+
+                    <div style={{
+                        background: changePercent > 0 ? '#f0fdf4' : '#fef2f2',
+                        padding: '8px',
+                        borderRadius: '6px',
+                        textAlign: 'center'
+                    }}>
+                        <div style={{ color: '#64748b', fontSize: '10px' }}>Change</div>
+                        <div style={{
+                            color: changePercent > 0 ? '#22c55e' : '#ef4444',
+                            fontWeight: 'bold',
+                            fontSize: '14px'
+                        }}>
+                            {changePercent > 0 ? '+' : ''}{changePercent.toFixed(2)}%
+                        </div>
+                    </div>
+
+                    <div style={{
+                        background: changePercent > 5 ? '#f0fdf4' : changePercent < -5 ? '#fef2f2' : '#fefce8',
+                        padding: '8px',
+                        borderRadius: '6px',
+                        textAlign: 'center'
+                    }}>
+                        <div style={{ color: '#64748b', fontSize: '10px' }}>Signal</div>
+                        <div style={{
+                            color: changePercent > 5 ? '#22c55e' : changePercent < -5 ? '#ef4444' : '#eab308',
+                            fontWeight: 'bold',
+                            fontSize: '14px'
+                        }}>
+                            {changePercent > 5 ? 'BUY' : changePercent < -5 ? 'SELL' : 'HOLD'}
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* Chart */}
             <ResponsiveContainer width="100%" height={height}>

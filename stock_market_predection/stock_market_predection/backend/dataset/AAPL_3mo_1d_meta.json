@@ -1,1 +1,1 @@
-{"ticker": "AAPL", "period": "3mo", "interval": "1d", "timestamp": "2026-06-02T12:04:10.692922", "rows": 64, "date_range": {"start": "2026-03-02T00:00:00-05:00", "end": "2026-06-01T00:00:00-04:00"}}
+{"ticker": "AAPL", "period": "3mo", "interval": "1d", "timestamp": "2026-07-05T11:10:26.184152", "rows": 62, "date_range": {"start": "2026-04-06T00:00:00-04:00", "end": "2026-07-02T00:00:00-04:00"}}

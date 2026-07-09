@@ -212,7 +212,7 @@ export default function LossChart({ data, isLoading = false }) {
                         fontWeight: 'bold',
                         fontSize: '10px'
                     }}>
-                        {stats.overfitting ? '⚠️ Overfitting' : '✅ Healthy'}
+                        {stats.overfitting ? '⚠️ Overfitting' : ' Healthy'}
                     </div>
                 </div>
             </div>

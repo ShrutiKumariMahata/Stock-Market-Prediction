@@ -517,7 +517,7 @@ export default function Analysis() {
                 </div>
             )}
 
-            {/* Price Chart - REMOVED Current, Predicted, Change, Signal boxes */}
+            {/* Price Chart - WITH showStatsCards={false} to hide stats on Analysis page */}
             {isReady && view === VIEWS.CHART && (
                 <div style={card}>
                     <div style={{
@@ -547,16 +547,15 @@ export default function Analysis() {
                         </button>
                     </div>
                     
-                    {/* PriceChart - Removed forecast, lower bound, upper bound from legend */}
+                    {/* IMPORTANT: showStatsCards={false} - This hides Current, Predicted, Change, Signal boxes */}
                     <PriceChart
                         data={chartData}
                         comparisonData={comparisonMode ? compareData : null}
                         comparisonLabel={comparisonMode ? compareTicker : null}
                         showLegend={true}
                         showConfidenceInterval={false}
+                        showStatsCards={false}
                     />
-                    
-                    {/* REMOVED the "Both stocks normalized to start at 100%" message */}
                 </div>
             )}
 

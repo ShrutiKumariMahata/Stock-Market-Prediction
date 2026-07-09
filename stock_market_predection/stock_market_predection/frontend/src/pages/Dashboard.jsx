@@ -274,7 +274,7 @@ export default function Dashboard() {
                 </div>
             )}
 
-            {/* Metrics Cards - All black text, smaller font */}
+            {/* Metrics Cards */}
             <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
@@ -314,7 +314,7 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Signal Badge Card - No emoji */}
+                {/* Signal Badge Card */}
                 <div style={metricCardStyle}>
                     {result ? (
                         <div style={{ textAlign: 'center' }}>
@@ -390,68 +390,9 @@ export default function Dashboard() {
                 )}
             </div>
 
-            {/* Prediction Results */}
+            {/* Model Analysis */}
             {result && (
                 <>
-                    {/* Technical Indicators - All black text, smaller font */}
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-                        gap: '10px'
-                    }}>
-                        {/* RSI Card */}
-                        <div style={metricCardStyle}>
-                            <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>RSI (14)</div>
-                            <div style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b' }}>
-                                {result.indicators.rsi}
-                            </div>
-                            <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '4px' }}>
-                                {result.indicators.rsi > 70 ? 'Overbought' : result.indicators.rsi < 30 ? 'Oversold' : 'Neutral'}
-                            </div>
-                        </div>
-
-                        {/* MACD Card */}
-                        <div style={metricCardStyle}>
-                            <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>MACD</div>
-                            <div style={{ fontSize: '14px', fontWeight: '700', color: '#1e293b' }}>
-                                {result.indicators.macd}
-                            </div>
-                        </div>
-
-                        {/* Bollinger Bands Card */}
-                        <div style={metricCardStyle}>
-                            <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>BOLLINGER BANDS</div>
-                            <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>
-                                {result.indicators.bollinger}
-                            </div>
-                        </div>
-
-                        {/* Volume Trend Card */}
-                        <div style={metricCardStyle}>
-                            <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>VOLUME TREND</div>
-                            <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>
-                                {result.indicators.volume_trend}
-                            </div>
-                        </div>
-
-                        {/* Sentiment Badge */}
-                        <div style={metricCardStyle}>
-                            <SentimentBadge score={result.indicators.sentiment_score} />
-                        </div>
-
-                        {/* Beta Card */}
-                        <div style={metricCardStyle}>
-                            <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>BETA</div>
-                            <div style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b' }}>
-                                {result.indicators.beta}
-                            </div>
-                            <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '4px' }}>
-                                {result.indicators.beta > 1.5 ? 'High Risk' : result.indicators.beta < 0.5 ? 'Low Risk' : 'Moderate Risk'}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Model Analysis */}
                     <div style={card}>
                         <div style={{
                             fontSize: '13px',

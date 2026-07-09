@@ -13,7 +13,6 @@ const card = {
     boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
 }
 
-// Style for metric cards (boxes) - Black text, smaller font
 const metricCardStyle = {
     background: '#ffffff',
     border: '1px solid #e2e8f0',
@@ -36,7 +35,6 @@ const TICKERS = [
     { symbol: 'NVDA', name: 'NVIDIA' },
 ]
 
-// Only LSTM + Attention model type - removed CNN-LSTM and Transformer
 const MODEL_TYPES = [
     { value: 'lstm_attention', label: 'LSTM + Attention' },
 ]
@@ -61,7 +59,8 @@ const inputStyle = {
     padding: '8px 12px',
     borderRadius: '8px',
     fontSize: '13px',
-    outline: 'none'
+    outline: 'none',
+    boxSizing: 'border-box'
 }
 
 export default function Training() {
@@ -79,9 +78,10 @@ export default function Training() {
         ticker: 'AAPL',
         epochs: 50,
         batchSize: 32,
-        learningRate: 0.001,
+        learningRate: 0.0003,
         modelType: 'lstm_attention',
-        sequenceLength: 60
+        sequenceLength: 60,
+        forceFullEpochs: false
     })
 
     const esRef = useRef(null)
@@ -95,15 +95,9 @@ export default function Training() {
                 setTrainingTime(Math.floor((Date.now() - startTimeRef.current) / 1000))
             }, 1000)
         } else {
-            if (timerRef.current) {
-                clearInterval(timerRef.current)
-            }
+            if (timerRef.current) clearInterval(timerRef.current)
         }
-        return () => {
-            if (timerRef.current) {
-                clearInterval(timerRef.current)
-            }
-        }
+        return () => { if (timerRef.current) clearInterval(timerRef.current) }
     }, [running])
 
     const addLine = useCallback((type, text) => {
@@ -132,6 +126,9 @@ export default function Training() {
         addLine('init', `Starting training for ${config.ticker}`)
         addLine('init', `Model: LSTM + Attention`)
         addLine('init', `Epochs: ${config.epochs} | Batch: ${config.batchSize} | LR: ${config.learningRate}`)
+        if (config.forceFullEpochs) {
+            addLine('init', 'Early stopping DISABLED — running all epochs')
+        }
 
         esRef.current = startTrainingStream(
             config,
@@ -210,29 +207,23 @@ export default function Training() {
     }, [running, config, addLine, trainingTime])
 
     const stopTraining = useCallback(() => {
-        if (esRef.current) {
-            esRef.current.close()
-        }
+        if (esRef.current) esRef.current.close()
         apiStopTraining().catch(console.error)
         setRunning(false)
         addLine('init', 'Training stopped by user.')
     }, [addLine])
 
     useEffect(() => {
-        return () => {
-            if (esRef.current) {
-                esRef.current.close()
-            }
-        }
+        return () => { if (esRef.current) esRef.current.close() }
     }, [])
 
     return (
-        <div style={{ 
-            padding: '24px', 
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: '20px', 
-            maxWidth: '1400px', 
+        <div style={{
+            padding: '24px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '20px',
+            maxWidth: '1400px',
             margin: '0 auto',
             background: '#f8fafc',
             minHeight: '100vh'
@@ -270,13 +261,10 @@ export default function Training() {
                             fontSize: '13px',
                             cursor: running ? 'not-allowed' : 'pointer',
                             fontWeight: '600',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
                             opacity: running ? 0.6 : 1
                         }}
                     >
-                        {running ? 'Training...' : 'Start Training'}
+                        {running ? 'Training...' : bestMetrics ? 'Train Again' : 'Start Training'}
                     </button>
                     <button
                         onClick={stopTraining}
@@ -298,12 +286,12 @@ export default function Training() {
                 </div>
             </div>
 
-            {/* Configuration Panel */}
-            {!running && !bestMetrics && (
+            {/* Configuration Panel - REMOVED Learning Rate box */}
+            {!running && (
                 <div style={{
                     ...card,
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
                     gap: '12px'
                 }}>
                     <div>
@@ -318,6 +306,7 @@ export default function Training() {
                             ))}
                         </select>
                     </div>
+
                     <div>
                         <label style={{ color: '#475569', fontSize: '11px', display: 'block', marginBottom: '4px', fontWeight: '500' }}>Model Type</label>
                         <select
@@ -330,38 +319,77 @@ export default function Training() {
                             ))}
                         </select>
                     </div>
+
                     <div>
                         <label style={{ color: '#475569', fontSize: '11px', display: 'block', marginBottom: '4px', fontWeight: '500' }}>Epochs</label>
                         <input
                             type="number"
                             value={config.epochs}
                             onChange={e => setConfig(prev => ({ ...prev, epochs: parseInt(e.target.value) || 50 }))}
-                            min={10}
-                            max={200}
+                            min={10} max={200}
                             style={inputStyle}
                         />
                     </div>
+
                     <div>
                         <label style={{ color: '#475569', fontSize: '11px', display: 'block', marginBottom: '4px', fontWeight: '500' }}>Batch Size</label>
                         <input
                             type="number"
                             value={config.batchSize}
                             onChange={e => setConfig(prev => ({ ...prev, batchSize: parseInt(e.target.value) || 32 }))}
-                            min={8}
-                            max={128}
+                            min={8} max={128}
                             style={inputStyle}
                         />
+                    </div>
+
+                    {/* Force full epochs toggle */}
+                    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+                        <label style={{ color: '#475569', fontSize: '11px', display: 'block', marginBottom: '4px', fontWeight: '500' }}>
+                            Early Stopping
+                        </label>
+                        <div
+                            onClick={() => setConfig(prev => ({ ...prev, forceFullEpochs: !prev.forceFullEpochs }))}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                padding: '8px 12px',
+                                borderRadius: '8px',
+                                border: '1px solid #e2e8f0',
+                                cursor: 'pointer',
+                                background: config.forceFullEpochs ? '#fef9c3' : '#f0fdf4',
+                                userSelect: 'none'
+                            }}
+                        >
+                            <div style={{
+                                width: '32px', height: '18px',
+                                background: config.forceFullEpochs ? '#94a3b8' : '#22c55e',
+                                borderRadius: '9px',
+                                position: 'relative',
+                                transition: 'background 0.2s',
+                                flexShrink: 0
+                            }}>
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '2px',
+                                    left: config.forceFullEpochs ? '2px' : '14px',
+                                    width: '14px', height: '14px',
+                                    background: '#fff',
+                                    borderRadius: '50%',
+                                    transition: 'left 0.2s'
+                                }} />
+                            </div>
+                            <span style={{ fontSize: '12px', color: '#475569' }}>
+                                {config.forceFullEpochs ? 'Disabled' : 'Enabled'}
+                            </span>
+                        </div>
                     </div>
                 </div>
             )}
 
             {/* Training Complete Summary */}
             {bestMetrics && !running && (
-                <div style={{
-                    ...card,
-                    background: '#f0fdf4',
-                    border: '1px solid #bbf7d0'
-                }}>
+                <div style={{ ...card, background: '#f0fdf4', border: '1px solid #bbf7d0' }}>
                     <div style={{ fontSize: '13px', fontWeight: '600', color: '#22c55e', marginBottom: '12px' }}>
                         Training Complete
                     </div>
@@ -384,84 +412,47 @@ export default function Training() {
                         </div>
                         <div>
                             <div style={{ color: '#64748b', fontSize: '10px' }}>Total Time</div>
-                            <div style={{ color: '#1e293b', fontSize: '18px', fontWeight: '600' }}>
-                                {formatTime(trainingTime)}
-                            </div>
+                            <div style={{ color: '#1e293b', fontSize: '18px', fontWeight: '600' }}>{formatTime(trainingTime)}</div>
                         </div>
                     </div>
-                    <button
-                        onClick={() => {
-                            setBestMetrics(null)
-                            setLossData([])
-                            setAccData([])
-                            setLines([])
-                            setCurrent(null)
-                            setEpochPct(0)
-                        }}
-                        style={{
-                            marginTop: '12px',
-                            background: '#dcfce7',
-                            border: '1px solid #bbf7d0',
-                            color: '#22c55e',
-                            padding: '6px 16px',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            fontSize: '12px'
-                        }}
-                    >
-                        Train Again
-                    </button>
                 </div>
             )}
 
-            {/* Metrics Cards - ALL BLACK TEXT with smaller font */}
+            {/* Metric Cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px' }}>
-                {/* Epoch Card */}
                 <div style={metricCardStyle}>
                     <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>EPOCH</div>
                     <div style={{ fontSize: '18px', fontWeight: '600', color: '#1e293b' }}>
                         {current ? `${current.epoch} / ${current.total}` : '— / —'}
                     </div>
                 </div>
-
-                {/* Train Loss Card */}
                 <div style={metricCardStyle}>
                     <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>TRAIN LOSS</div>
                     <div style={{ fontSize: '18px', fontWeight: '600', color: '#1e293b' }}>
                         {current ? current.train_loss?.toFixed(4) : '—'}
                     </div>
                 </div>
-
-                {/* Val Loss Card */}
                 <div style={metricCardStyle}>
                     <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>VAL LOSS</div>
                     <div style={{ fontSize: '18px', fontWeight: '600', color: '#1e293b' }}>
                         {current ? current.val_loss?.toFixed(4) : '—'}
                     </div>
                 </div>
-
-                {/* Direction Acc Card */}
                 <div style={metricCardStyle}>
                     <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>DIRECTION ACC</div>
                     <div style={{ fontSize: '18px', fontWeight: '600', color: '#1e293b' }}>
                         {current ? `${current.direction_accuracy?.toFixed(1)}%` : '—'}
                     </div>
                 </div>
-
-                {/* Learning Rate Card */}
                 <div style={metricCardStyle}>
                     <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>LEARNING RATE</div>
                     <div style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', fontFamily: 'monospace' }}>
-                        {current ? current.lr : '1e-3'}
+                        {current ? current.lr : config.learningRate}
                     </div>
                 </div>
-
-                {/* Progress Card */}
                 <div style={metricCardStyle}>
                     <div style={{ fontSize: '10px', fontWeight: '500', color: '#64748b', marginBottom: '4px', letterSpacing: '0.5px' }}>PROGRESS</div>
-                    <div style={{ fontSize: '18px', fontWeight: '600', color: '#1e293b' }}>
-                        {epochPct}%
-                    </div>
+                    <div style={{ fontSize: '18px', fontWeight: '600', color: '#1e293b' }}>{epochPct}%</div>
                     {running && <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '4px' }}>{formatTime(trainingTime)}</div>}
                 </div>
             </div>
@@ -472,9 +463,7 @@ export default function Training() {
                     <span style={{ fontSize: '12px', color: '#64748b' }}>
                         {running ? 'Training Progress' : bestMetrics ? 'Training Complete' : 'Ready'}
                     </span>
-                    <span style={{ fontSize: '12px', color: '#64748b', fontFamily: 'monospace' }}>
-                        {epochPct}%
-                    </span>
+                    <span style={{ fontSize: '12px', color: '#64748b', fontFamily: 'monospace' }}>{epochPct}%</span>
                 </div>
                 <div style={{ height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
                     <div style={{
@@ -482,33 +471,18 @@ export default function Training() {
                         width: `${epochPct}%`,
                         background: running ? 'linear-gradient(90deg, #2563eb, #60a5fa)' : '#22c55e',
                         borderRadius: '4px',
-                        transition: 'width 0.3s ease',
-                        position: 'relative'
-                    }}>
-                        {running && (
-                            <div style={{
-                                position: 'absolute',
-                                right: 0,
-                                top: 0,
-                                bottom: 0,
-                                width: '20px',
-                                background: 'rgba(255,255,255,0.3)',
-                                borderRadius: '4px',
-                                animation: 'shimmer 1s ease-in-out infinite'
-                            }} />
-                        )}
-                    </div>
+                        transition: 'width 0.3s ease'
+                    }} />
                 </div>
                 {current && (
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        marginTop: '6px',
-                        fontSize: '10px',
-                        color: '#94a3b8'
-                    }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '10px', color: '#94a3b8' }}>
                         <span>Epoch {current.epoch} of {current.total}</span>
                         {current.is_best && <span style={{ color: '#22c55e' }}>● Best model saved</span>}
+                        {!config.forceFullEpochs && current.patience >= 0 && (
+                            <span style={{ color: current.patience > 10 ? '#f59e0b' : '#94a3b8' }}>
+                                Patience: {current.patience}/{15}
+                            </span>
+                        )}
                     </div>
                 )}
             </div>
